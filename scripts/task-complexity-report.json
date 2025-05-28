@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-27T07:30:14.387Z",
+    "tasksAnalyzed": 10,
+    "totalTasks": 10,
+    "analysisCount": 10,
+    "thresholdScore": 5,
+    "projectName": "Taskmaster",
+    "usedResearch": false
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Project Setup and Configuration",
+      "complexityScore": 4,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down the project initialization into separate subtasks for frontend setup, backend setup, project structure configuration, development scripts, environment variables, CORS configuration, and Git repository initialization.",
+      "reasoning": "Moderate complexity due to multiple technology stacks and configuration requirements, but well-defined steps with standard tooling."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Database Schema Design and Setup",
+      "complexityScore": 6,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Separate into subtasks for SQLAlchemy installation, individual model creation (User, ScheduledTrade, Trade, MarketData), Alembic setup, migration creation, database connection setup, and CRUD utility functions.",
+      "reasoning": "Higher complexity due to database design decisions, relationship modeling, and migration management requiring careful planning and testing."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Local Authentication System",
+      "complexityScore": 7,
+      "recommendedSubtasks": 9,
+      "expansionPrompt": "Break into subtasks for dependency installation, password hashing utilities, JWT token management, individual endpoint creation (register, login, me), authentication middleware, session management, API key encryption, and security configuration.",
+      "reasoning": "High complexity due to security considerations, JWT implementation, and multiple authentication components requiring careful integration."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "CCXT Integration with MEXC",
+      "complexityScore": 8,
+      "recommendedSubtasks": 10,
+      "expansionPrompt": "Divide into subtasks for CCXT installation, exchange wrapper class creation, individual market data functions (ticker, OHLCV, order book), trading functions (market orders, limit orders, order status, cancellation), error handling, and connection management.",
+      "reasoning": "Very high complexity due to external API integration, rate limiting, error handling, and financial transaction safety requirements."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Scheduled Trading Engine",
+      "complexityScore": 9,
+      "recommendedSubtasks": 12,
+      "expansionPrompt": "Break into subtasks for APScheduler setup, ScheduledTradeEngine class creation, job scheduling logic, individual execution functions (buy/sell), trade validation components, balance checking, order monitoring, error handling, retry mechanisms, job persistence, and recovery systems.",
+      "reasoning": "Highest complexity due to critical business logic, timing precision requirements, error recovery, and integration with multiple systems."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Backend API Endpoints",
+      "complexityScore": 5,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Separate into subtasks for router creation, individual endpoint groups (auth, users, scheduled-trades, trades, market-data), request validation with Pydantic, error handling, status codes, and API documentation setup.",
+      "reasoning": "Moderate-high complexity due to multiple endpoint groups and validation requirements, but follows standard REST patterns."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Frontend Foundation and Authentication UI",
+      "complexityScore": 6,
+      "recommendedSubtasks": 10,
+      "expansionPrompt": "Break into subtasks for Next.js setup, dependency installation, authentication page creation (login, register), protected route wrapper, authentication context, UI component library, React Query setup, Tailwind configuration, responsive design, and form validation.",
+      "reasoning": "Moderate-high complexity due to modern React patterns, authentication flow, and multiple UI components requiring consistent design."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Dashboard and Scheduled Trade Management UI",
+      "complexityScore": 7,
+      "recommendedSubtasks": 11,
+      "expansionPrompt": "Divide into subtasks for dashboard layout, navigation sidebar, scheduled trade components (form, list, card), form elements (pair selector, date pickers, amount input), real-time updates, WebSocket integration, data visualization, charts, mobile responsiveness, and user experience optimization.",
+      "reasoning": "High complexity due to complex UI interactions, real-time data handling, and multiple interconnected components."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "WebSocket Real-time Data System",
+      "complexityScore": 8,
+      "recommendedSubtasks": 10,
+      "expansionPrompt": "Break into subtasks for WebSocket server setup, connection management, data stream creation (market data, trade updates, notifications), client-side WebSocket implementation, auto-reconnection logic, message routing, broadcasting system, message queuing, authentication, and performance optimization.",
+      "reasoning": "Very high complexity due to real-time communication requirements, connection management, and data synchronization challenges."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Portfolio Tracking and Analytics Dashboard",
+      "complexityScore": 7,
+      "recommendedSubtasks": 12,
+      "expansionPrompt": "Separate into subtasks for Chart.js installation, portfolio overview components, individual chart types (pie, timeline, performance), analytics calculations (P&L, win rate, risk metrics), interactive chart features, data export functionality (CSV, PDF), filtering systems, caching implementation, alert system, and performance optimization.",
+      "reasoning": "High complexity due to financial calculations, data visualization requirements, and performance considerations for large datasets."
+    }
+  ]
+}

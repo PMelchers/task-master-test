@@ -1,0 +1,422 @@
+<context>
+# Overview
+A cryptocurrency trading platform that automates scheduled trading strategies on MEXC. The system will allow users to set up, monitor, and manage automated trading strategies with a user-friendly interface. The platform will provide real-time market data, strategy performance metrics, and risk management tools.
+
+# Core Features
+1. User Authentication & Management
+   - Simple local authentication system
+   - User profile management
+   - API key management for MEXC integration
+   - Basic access control
+
+2. Scheduled Trading Strategy Management
+   - Create and configure scheduled trading strategies
+   - Set specific buy/sell times
+   - Define trading pairs and amounts
+   - Strategy templates for common approaches
+   - Strategy performance tracking
+
+3. Market Data Integration
+   - Real-time price feeds from MEXC via CCXT
+   - Historical data access
+   - Technical indicators calculation
+   - Market overview dashboard
+
+4. Automated Trading Execution
+   - Scheduled execution engine
+   - Order management system
+   - Position tracking
+   - Risk management controls
+   - Trade history and logs
+
+5. Monitoring & Analytics
+   - Real-time portfolio tracking
+   - Performance metrics and charts
+   - Trade history and analysis
+   - Risk metrics dashboard
+   - Alert system for important events
+
+# User Experience
+User Personas:
+1. Scheduled Trader
+   - Needs to set specific buy/sell times
+   - Wants to create and modify scheduled trades
+   - Requires detailed performance analytics
+   - Needs real-time alerts
+
+2. Passive Investor
+   - Prefers pre-built scheduled trading templates
+   - Wants simple portfolio monitoring
+   - Needs clear performance reports
+   - Values automated risk management
+
+Key User Flows:
+1. Onboarding
+   - Registration/Login
+   - API key setup
+   - Initial scheduled trade configuration
+
+2. Strategy Management
+   - Scheduled trade creation/editing
+   - Time and parameter configuration
+   - Activation/deactivation
+
+3. Monitoring
+   - Dashboard view
+   - Performance tracking
+   - Alert management
+
+UI/UX Considerations:
+- Clean, modern interface
+- Real-time data visualization
+- Mobile-responsive design
+- Intuitive navigation
+- Clear error messages and confirmations
+
+# Technical Architecture
+System Components:
+1. Frontend (React)
+   - Next.js for SSR and routing
+   - Tailwind CSS for styling
+   - React Query for data fetching
+   - WebSocket for real-time updates
+   - Chart.js for data visualization
+
+2. Backend (FastAPI)
+   - RESTful API endpoints
+   - WebSocket server for real-time data
+   - Scheduled execution engine
+   - Market data processing
+   - Authentication middleware
+
+3. Database (SQLite)
+   - User data
+   - Strategy configurations
+   - Trade history
+   - Performance metrics
+   - Market data caching
+
+4. External Integrations
+   - CCXT for MEXC integration
+   - WebSocket for market data
+   - Email service for notifications
+
+Data Models:
+1. User
+   - Profile information
+   - API credentials
+   - Preferences
+
+2. ScheduledTrade
+   - Buy time configuration
+   - Sell time configuration
+   - Trading pair
+   - Amount
+   - Performance metrics
+
+3. Trade
+   - Order details
+   - Execution data
+   - Performance metrics
+
+4. Market Data
+   - Price history
+   - Technical indicators
+   - Market statistics
+
+# Development Roadmap
+Phase 1 - MVP (Foundation)
+1. Basic Infrastructure
+   - Project setup (React + FastAPI)
+   - Database schema design
+   - Local authentication system
+   - Basic UI components
+
+2. Core Trading Features
+   - CCXT integration with MEXC
+   - Scheduled trade execution
+   - Simple order management
+   - Basic portfolio tracking
+
+3. Essential UI
+   - Dashboard layout
+   - Scheduled trade configuration interface
+   - Basic charts and metrics
+   - User settings
+
+Phase 2 - Enhanced Features
+1. Advanced Trading
+   - Multiple scheduled trades support
+   - Advanced order types
+   - Risk management tools
+   - Performance analytics
+
+2. UI Improvements
+   - Advanced charts
+   - Real-time updates
+   - Mobile optimization
+   - Custom alerts
+
+Phase 3 - Advanced Features
+1. Strategy Marketplace
+   - Strategy sharing
+   - Community features
+   - Strategy backtesting
+   - Performance comparison
+
+2. Advanced Analytics
+   - Machine learning integration
+   - Predictive analytics
+   - Custom indicators
+   - Advanced reporting
+
+# Logical Dependency Chain
+1. Foundation (Must be built first)
+   - Project setup and configuration
+   - Database schema and migrations
+   - Local authentication system
+   - Basic API structure
+
+2. Core Trading Engine
+   - CCXT integration with MEXC
+   - Basic order execution
+   - Scheduled trade framework
+   - Market data processing
+
+3. Essential UI Components
+   - Dashboard
+   - Scheduled trade configuration
+   - Basic charts
+   - User settings
+
+4. Enhanced Features
+   - Advanced trading features
+   - Real-time updates
+   - Advanced analytics
+   - Risk management
+
+# Risks and Mitigations
+Technical Challenges:
+1. Real-time Data Processing
+   - Risk: High latency in market data
+   - Mitigation: Implement efficient WebSocket handling and data caching
+
+2. Scheduled Execution
+   - Risk: Failed trades or incorrect execution
+   - Mitigation: Implement robust error handling and validation
+
+3. API Rate Limits
+   - Risk: Hitting MEXC API limits
+   - Mitigation: Implement rate limiting and request queuing
+
+4. Data Consistency
+   - Risk: Inconsistent state between systems
+   - Mitigation: Implement proper transaction handling and state management
+
+Resource Constraints:
+1. Development Complexity
+   - Risk: Overwhelming feature set
+   - Mitigation: Focus on MVP features first, iterate based on feedback
+
+2. Performance
+   - Risk: Slow response times
+   - Mitigation: Implement proper caching and optimization
+
+# Appendix
+Technical Specifications:
+1. Frontend Requirements
+   - Node.js 18+
+   - React 18+
+   - Next.js 13+
+   - Tailwind CSS
+
+2. Backend Requirements
+   - Python 3.9+
+   - FastAPI
+   - WebSocket support
+   - Async support
+   - CCXT library
+
+3. Database Requirements
+   - SQLite
+   - Real-time subscriptions
+
+4. Infrastructure
+   - Local development environment
+   - Monitoring and logging
+   - Backup systems
+</context>
+<PRD>
+# Technical Architecture
+System Components:
+1. Frontend (React)
+   - Next.js for SSR and routing
+   - Tailwind CSS for styling
+   - React Query for data fetching
+   - WebSocket for real-time updates
+   - Chart.js for data visualization
+
+2. Backend (FastAPI)
+   - RESTful API endpoints
+   - WebSocket server for real-time data
+   - Scheduled execution engine
+   - Market data processing
+   - Authentication middleware
+
+3. Database (SQLite)
+   - User data
+   - Strategy configurations
+   - Trade history
+   - Performance metrics
+   - Market data caching
+
+4. External Integrations
+   - CCXT for MEXC integration
+   - WebSocket for market data
+   - Email service for notifications
+
+Data Models:
+1. User
+   - Profile information
+   - API credentials
+   - Preferences
+
+2. ScheduledTrade
+   - Buy time configuration
+   - Sell time configuration
+   - Trading pair
+   - Amount
+   - Performance metrics
+
+3. Trade
+   - Order details
+   - Execution data
+   - Performance metrics
+
+4. Market Data
+   - Price history
+   - Technical indicators
+   - Market statistics
+
+# Development Roadmap
+Phase 1 - MVP (Foundation)
+1. Basic Infrastructure
+   - Project setup (React + FastAPI)
+   - Database schema design
+   - Local authentication system
+   - Basic UI components
+
+2. Core Trading Features
+   - CCXT integration with MEXC
+   - Scheduled trade execution
+   - Simple order management
+   - Basic portfolio tracking
+
+3. Essential UI
+   - Dashboard layout
+   - Scheduled trade configuration interface
+   - Basic charts and metrics
+   - User settings
+
+Phase 2 - Enhanced Features
+1. Advanced Trading
+   - Multiple scheduled trades support
+   - Advanced order types
+   - Risk management tools
+   - Performance analytics
+
+2. UI Improvements
+   - Advanced charts
+   - Real-time updates
+   - Mobile optimization
+   - Custom alerts
+
+Phase 3 - Advanced Features
+1. Strategy Marketplace
+   - Strategy sharing
+   - Community features
+   - Strategy backtesting
+   - Performance comparison
+
+2. Advanced Analytics
+   - Machine learning integration
+   - Predictive analytics
+   - Custom indicators
+   - Advanced reporting
+
+# Logical Dependency Chain
+1. Foundation (Must be built first)
+   - Project setup and configuration
+   - Database schema and migrations
+   - Local authentication system
+   - Basic API structure
+
+2. Core Trading Engine
+   - CCXT integration with MEXC
+   - Basic order execution
+   - Scheduled trade framework
+   - Market data processing
+
+3. Essential UI Components
+   - Dashboard
+   - Scheduled trade configuration
+   - Basic charts
+   - User settings
+
+4. Enhanced Features
+   - Advanced trading features
+   - Real-time updates
+   - Advanced analytics
+   - Risk management
+
+# Risks and Mitigations
+Technical Challenges:
+1. Real-time Data Processing
+   - Risk: High latency in market data
+   - Mitigation: Implement efficient WebSocket handling and data caching
+
+2. Scheduled Execution
+   - Risk: Failed trades or incorrect execution
+   - Mitigation: Implement robust error handling and validation
+
+3. API Rate Limits
+   - Risk: Hitting MEXC API limits
+   - Mitigation: Implement rate limiting and request queuing
+
+4. Data Consistency
+   - Risk: Inconsistent state between systems
+   - Mitigation: Implement proper transaction handling and state management
+
+Resource Constraints:
+1. Development Complexity
+   - Risk: Overwhelming feature set
+   - Mitigation: Focus on MVP features first, iterate based on feedback
+
+2. Performance
+   - Risk: Slow response times
+   - Mitigation: Implement proper caching and optimization
+
+# Appendix
+Technical Specifications:
+1. Frontend Requirements
+   - Node.js 18+
+   - React 18+
+   - Next.js 13+
+   - Tailwind CSS
+
+2. Backend Requirements
+   - Python 3.9+
+   - FastAPI
+   - WebSocket support
+   - Async support
+   - CCXT library
+
+3. Database Requirements
+   - SQLite
+   - Real-time subscriptions
+
+4. Infrastructure
+   - Local development environment
+   - Monitoring and logging
+   - Backup systems
+</PRD> 
