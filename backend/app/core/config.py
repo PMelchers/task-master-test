@@ -1,6 +1,6 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,25 +11,29 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Scheduled Trader"
     
     # Database settings
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./scheduled_trader.db")
+    DATABASE_URL: str = Field(default="sqlite:///./scheduled_trader.db", env="DATABASE_URL")
     
     # Security settings
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+    SECRET_KEY: str = Field(default="your-very-secret-key", env="SECRET_KEY")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 8, env="ACCESS_TOKEN_EXPIRE_MINUTES")
+    ALGORITHM: str = Field(default="HS256", env="ALGORITHM")
     
     # CORS settings
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",  # Frontend development server
-        "http://localhost:8080",  # Backend development server
-    ]
+    CORS_ORIGINS: List[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://localhost:8084",
+        ],
+        env="CORS_ORIGINS"
+    )
     
     # Environment settings
-    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    ENVIRONMENT: str = Field(default="development", env="ENVIRONMENT")
     
     # Exchange settings
-    MEXC_API_KEY: str = os.getenv("MEXC_API_KEY", "")
-    MEXC_API_SECRET: str = os.getenv("MEXC_API_SECRET", "")
+    MEXC_API_KEY: str = Field(default="", env="MEXC_API_KEY")
+    MEXC_API_SECRET: str = Field(default="", env="MEXC_API_SECRET")
     
     model_config = SettingsConfigDict(case_sensitive=True)
 
-settings = Settings() 
+settings = Settings()

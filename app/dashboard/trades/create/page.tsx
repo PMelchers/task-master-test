@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '../../../../app/components/ui/button';
+import { Input } from '../../../../app/components/ui/input';
+import { Label } from '../../../../app/components/ui/label';
+import { Alert, AlertDescription } from '../../../../app/components/ui/alert';
 import { getCookie } from 'cookies-next';
 
 export default function CreateTradePage() {
@@ -14,6 +14,7 @@ export default function CreateTradePage() {
   const [symbol, setSymbol] = useState('');
   const [buyTime, setBuyTime] = useState('');
   const [sellTime, setSellTime] = useState('');
+  const [amount, setAmount] = useState(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,14 +30,15 @@ export default function CreateTradePage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/trades/', {
+      const response = await fetch('http://localhost:8084/trades/scheduled', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          symbol,
+          trading_pair: symbol,
+          amount,
           buy_time: buyTime,
           sell_time: sellTime,
         }),
@@ -74,6 +76,18 @@ export default function CreateTradePage() {
                     placeholder="e.g., BTC/USDT"
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="amount">Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={amount}
+                    onChange={(e) => setAmount(Number(e.target.value))}
                     required
                   />
                 </div>
@@ -121,4 +135,4 @@ export default function CreateTradePage() {
       </div>
     </div>
   );
-} 
+}

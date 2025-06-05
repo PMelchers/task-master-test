@@ -8,24 +8,22 @@ import { Loading } from '@/components/ui/loading';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { getCookie } from 'cookies-next';
 
-interface Trade {
+interface ScheduledTrade {
   id: string;
-  symbol: string;
-  side: 'buy' | 'sell';
-  type: 'market' | 'limit';
+  trading_pair: string;
   amount: number;
-  price?: number;
-  status: 'pending' | 'executed' | 'failed' | 'cancelled';
-  scheduled_time: string;
+  buy_time: string;
+  sell_time: string;
   created_at: string;
-  executed_time?: string;
+  status?: string;
+  price?: number;
 }
 
 interface WebSocketMessage {
   type: string;
   trade_id: string;
   data: {
-    status: Trade['status'];
+    status: ScheduledTrade['status'];
     executed_price?: number;
     executed_time?: string;
   };
@@ -33,13 +31,17 @@ interface WebSocketMessage {
 
 export default function TradesPage() {
   const router = useRouter();
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [trades, setTrades] = useState<ScheduledTrade[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { lastMessage, isConnected } = useWebSocket<WebSocketMessage>('ws://localhost:8080/ws/trade-updates');
+  const token = getCookie('token');
+  const wsUrl = token
+    ? `ws://localhost:8084/ws/trade-updates?token=${token}`
+    : 'ws://localhost:8084/ws/trade-updates';
+
+  const { lastMessage, isConnected } = useWebSocket<WebSocketMessage>(wsUrl);
 
   useEffect(() => {
-    const token = getCookie('token');
     if (!token) {
       router.push('/login');
       return;
@@ -47,27 +49,27 @@ export default function TradesPage() {
 
     const fetchTrades = async () => {
       try {
-        const response = await fetch('http://localhost:8080/trades', {
+        const response = await fetch('http://localhost:8084/trades/scheduled', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch trades');
+          throw new Error('Failed to fetch scheduled trades');
         }
 
         const data = await response.json();
         setTrades(data);
       } catch (error) {
-        console.error('Error fetching trades:', error);
+        console.error('Error fetching scheduled trades:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTrades();
-  }, [router]);
+  }, [router, token]);
 
   useEffect(() => {
     if (lastMessage && lastMessage.type === 'trade_update') {
@@ -115,49 +117,34 @@ export default function TradesPage() {
           {trades.map((trade) => (
             <Card key={trade.id}>
               <CardHeader>
-                <CardTitle>{trade.symbol}</CardTitle>
+                <CardTitle>{trade.trading_pair}</CardTitle>
                 <CardDescription>
-                  {trade.type === 'market' ? 'Market Order' : `Limit Order at $${trade.price}`}
+                  Scheduled Trade
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Side</p>
-                    <p className={trade.side === 'buy' ? 'text-green-500' : 'text-red-500'}>
-                      {trade.side.toUpperCase()}
-                    </p>
-                  </div>
-                  <div>
                     <p className="text-sm text-gray-500">Amount</p>
                     <p>{trade.amount}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Status</p>
-                    <p className={
-                      trade.status === 'executed' ? 'text-green-500' :
-                      trade.status === 'failed' ? 'text-red-500' :
-                      trade.status === 'cancelled' ? 'text-gray-500' :
-                      'text-yellow-500'
-                    }>
-                      {trade.status.toUpperCase()}
-                    </p>
+                    <p className="text-sm text-gray-500">Buy Time</p>
+                    <p>{new Date(trade.buy_time).toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Scheduled For</p>
-                    <p>{new Date(trade.scheduled_time).toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Sell Time</p>
+                    <p>{new Date(trade.sell_time).toLocaleString()}</p>
                   </div>
-                  {trade.executed_time && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-500">Executed At</p>
-                        <p>{new Date(trade.executed_time).toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Executed Price</p>
-                        <p>${trade.price?.toFixed(2)}</p>
-                      </div>
-                    </>
+                  <div>
+                    <p className="text-sm text-gray-500">Created At</p>
+                    <p>{new Date(trade.created_at).toLocaleString()}</p>
+                  </div>
+                  {trade.status && (
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      <p>{trade.status.toUpperCase()}</p>
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -167,4 +154,4 @@ export default function TradesPage() {
       </div>
     </div>
   );
-} 
+}

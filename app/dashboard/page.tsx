@@ -70,7 +70,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = getCookie('token');
+    console.log("Token from cookie:", token);
+
     if (!token) {
+      console.warn("No token found, redirecting to login.");
       router.push('/login');
       return;
     }
@@ -78,42 +81,74 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         // Fetch portfolio data
-        const portfolioResponse = await fetch('http://localhost:8080/portfolio', {
+        console.log("Fetching portfolio data...");
+        const portfolioResponse = await fetch('http://localhost:8084/trades/portfolio', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        console.log("Portfolio response status:", portfolioResponse.status);
         if (portfolioResponse.ok) {
           const portfolioData = await portfolioResponse.json();
+          console.log("Portfolio data:", portfolioData);
           setPortfolioData(portfolioData);
+        } else {
+          const errorData = await portfolioResponse.json().catch(() => ({}));
+          console.error("Portfolio fetch error:", errorData);
         }
 
         // Fetch trade metrics
-        const metricsResponse = await fetch('http://localhost:8080/trades/metrics', {
+        console.log("Fetching trade metrics...");
+        const metricsResponse = await fetch('http://localhost:8084/trades/metrics', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        console.log("Metrics response status:", metricsResponse.status);
         if (metricsResponse.ok) {
           const metricsData = await metricsResponse.json();
+          console.log("Trade metrics data:", metricsData);
           setTradeMetrics(metricsData);
+        } else {
+          const errorData = await metricsResponse.json().catch(() => ({}));
+          console.error("Metrics fetch error:", errorData);
         }
 
         // Fetch recent trades
-        const tradesResponse = await fetch('http://localhost:8080/trades/recent', {
+        console.log("Fetching recent trades...");
+        const tradesResponse = await fetch('http://localhost:8084/trades/recent', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        console.log("Recent trades response status:", tradesResponse.status);
         if (tradesResponse.ok) {
           const tradesData = await tradesResponse.json();
+          console.log("Recent trades data:", tradesData);
           setRecentTrades(tradesData);
+        } else {
+          const errorData = await tradesResponse.json().catch(() => ({}));
+          console.error("Recent trades fetch error:", errorData);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
+        console.log("Dashboard loading complete.");
       }
     };
 
     fetchDashboardData();
   }, [router]);
 
+  useEffect(() => {
+    console.log("PortfolioData state updated:", portfolioData);
+  }, [portfolioData]);
+
+  useEffect(() => {
+    console.log("TradeMetrics state updated:", tradeMetrics);
+  }, [tradeMetrics]);
+
+  useEffect(() => {
+    console.log("RecentTrades state updated:", recentTrades);
+  }, [recentTrades]);
+
   if (loading) {
+    console.log("Loading dashboard...");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading size="lg" />
@@ -145,6 +180,12 @@ export default function DashboardPage() {
       ],
     }]
   };
+
+  console.log("Rendering dashboard with data:", {
+    portfolioData,
+    tradeMetrics,
+    recentTrades
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -262,4 +303,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

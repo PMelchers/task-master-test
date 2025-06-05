@@ -12,11 +12,16 @@ class PortfolioService:
 
     def get_portfolio_value(self, user_id: int) -> Dict:
         """Calculate total portfolio value and asset allocation."""
-        # Get all executed trades for the user
-        trades = self.db.query(Trade).filter(
-            Trade.user_id == user_id,
-            Trade.status == 'executed'
-        ).all()
+        # Get all executed trades for the user via ScheduledTrade
+        trades = (
+            self.db.query(Trade)
+            .join(ScheduledTrade, Trade.scheduled_trade_id == ScheduledTrade.id)
+            .filter(
+                ScheduledTrade.user_id == user_id,
+                Trade.status == 'executed'
+            )
+            .all()
+        )
 
         # Calculate current holdings
         holdings: Dict[str, float] = {}
@@ -56,13 +61,19 @@ class PortfolioService:
 
     def get_portfolio_history(self, user_id: int, days: int = 30) -> List[Dict]:
         """Get portfolio value history over time."""
-        # Get all executed trades within the time period
+        # Get all executed trades within the time period via ScheduledTrade
         start_date = datetime.utcnow() - timedelta(days=days)
-        trades = self.db.query(Trade).filter(
-            Trade.user_id == user_id,
-            Trade.status == 'executed',
-            Trade.executed_time >= start_date
-        ).order_by(Trade.executed_time).all()
+        trades = (
+            self.db.query(Trade)
+            .join(ScheduledTrade, Trade.scheduled_trade_id == ScheduledTrade.id)
+            .filter(
+                ScheduledTrade.user_id == user_id,
+                Trade.status == 'executed',
+                Trade.executed_at >= start_date  # <-- fix here
+            )
+            .order_by(Trade.executed_at)  # <-- and here
+            .all()
+        )
 
         # Calculate portfolio value at each trade
         history = []
@@ -82,7 +93,7 @@ class PortfolioService:
                 value = holdings.get(symbol, 0) * ticker['last']
                 current_value += value
                 history.append({
-                    'timestamp': trade.executed_time.isoformat(),
+                    'timestamp': trade.executed_at.isoformat(),  # <-- and here
                     'value': current_value
                 })
             except Exception as e:
@@ -92,10 +103,15 @@ class PortfolioService:
 
     def get_trade_metrics(self, user_id: int) -> Dict:
         """Calculate trading performance metrics."""
-        trades = self.db.query(Trade).filter(
-            Trade.user_id == user_id,
-            Trade.status == 'executed'
-        ).all()
+        trades = (
+            self.db.query(Trade)
+            .join(ScheduledTrade, Trade.scheduled_trade_id == ScheduledTrade.id)
+            .filter(
+                ScheduledTrade.user_id == user_id,
+                Trade.status == 'executed'
+            )
+            .all()
+        )
 
         total_trades = len(trades)
         successful_trades = sum(1 for t in trades if t.profit > 0)
@@ -113,9 +129,14 @@ class PortfolioService:
 
     def get_recent_trades(self, user_id: int, limit: int = 10) -> List[Dict]:
         """Get recent trades for the user."""
-        trades = self.db.query(Trade).filter(
-            Trade.user_id == user_id
-        ).order_by(Trade.executed_time.desc()).limit(limit).all()
+        trades = (
+            self.db.query(Trade)
+            .join(ScheduledTrade, Trade.scheduled_trade_id == ScheduledTrade.id)
+            .filter(ScheduledTrade.user_id == user_id)
+            .order_by(Trade.executed_at.desc())  # <-- fix here
+            .limit(limit)
+            .all()
+        )
 
         return [{
             'id': str(trade.id),
@@ -123,6 +144,6 @@ class PortfolioService:
             'side': trade.side,
             'amount': trade.amount,
             'price': trade.executed_price,
-            'timestamp': trade.executed_time.isoformat(),
+            'timestamp': trade.executed_at.isoformat(),  # <-- and here
             'status': trade.status
-        } for trade in trades] 
+        } for trade in trades]

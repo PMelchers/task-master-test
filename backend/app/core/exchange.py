@@ -156,9 +156,77 @@ class MEXCExchange:
                 detail="Failed to fetch account balance"
             )
 
+    async def fetch_markets(self):
+        """Return a list of available markets/trading pairs."""
+        try:
+            self._rate_limit()
+            markets = await self.exchange.fetch_markets()
+            return [{"symbol": market["symbol"]} for market in markets]
+        except Exception as e:
+            logger.error(f"Error fetching markets: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to fetch markets"
+            )
+
     async def close(self):
         """Close the exchange connection."""
         await self.exchange.close()
 
-def get_exchange():
-    return MEXCExchange(api_key=settings.MEXC_API_KEY, api_secret=settings.MEXC_API_SECRET) 
+    async def get_market_summary(self, symbol: str) -> Dict:
+        """Get comprehensive market summary for a symbol."""
+        try:
+            logger.info(f"Fetching ticker for {symbol}")
+            ticker = await self.exchange.fetch_ticker(symbol)
+            logger.info(f"Ticker for {symbol}: {ticker}")
+            order_book = await self.exchange.fetch_order_book(symbol, limit=5)
+            logger.info(f"Order book for {symbol}: {order_book}")
+
+            return {
+                'symbol': symbol,
+                'last_price': ticker['last'],
+                '24h_high': ticker['high'],
+                '24h_low': ticker['low'],
+                '24h_volume': ticker['quoteVolume'],
+                'bid': order_book['bids'][0][0] if order_book['bids'] else None,
+                'ask': order_book['asks'][0][0] if order_book['asks'] else None,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error fetching market summary for {symbol}: {str(e)}")
+            raise
+
+    async def get_available_trading_pairs(self) -> List[str]:
+        """Get a limited list of available trading pairs from MEXC, sorted by volume."""
+        try:
+            markets = await self.exchange.fetch_markets()
+            filtered = [
+                market for market in markets
+                if market.get('active', True)
+                and market.get('type', 'spot') == 'spot'
+                and market['symbol'].endswith('/USDT')
+            ]
+            # Add this after filtering
+            logger.info(f"First filtered market: {filtered[0]}")
+            logger.info(f"First filtered market info: {filtered[0].get('info', {})}")
+            # Sort by quoteVolume or baseVolume if available, descending
+            sorted_markets = sorted(
+                filtered,
+                key=lambda m: m.get('info', {}).get('volume', 0),  # Adjust key as needed
+                reverse=True
+            )
+            return [market['symbol'] for market in sorted_markets[:20]]
+        except Exception as e:
+            logger.error(f"Error fetching trading pairs: {str(e)}")
+            raise
+
+from app.core.exchange import MEXCExchange
+from app.core.config import settings
+
+exchange_instance = MEXCExchange(
+    api_key=settings.MEXC_API_KEY,
+    api_secret=settings.MEXC_API_SECRET
+)
+
+def get_exchange() -> MEXCExchange:
+    return exchange_instance

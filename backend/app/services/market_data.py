@@ -74,10 +74,24 @@ class MarketDataService:
             await self.cache_market_data(db, symbol)
 
     async def get_available_trading_pairs(self) -> List[str]:
-        """Get list of available trading pairs."""
+        """Get a limited list of available trading pairs from MEXC, prioritizing major pairs."""
         try:
             markets = await self.exchange.fetch_markets()
-            return [market['symbol'] for market in markets if market['active']]
+            filtered = [
+                market['symbol']
+                for market in markets
+                if market.get('active', True)
+                and market.get('type', 'spot') == 'spot'
+                and market['symbol'].endswith('/USDT')
+            ]
+            # Prioritize major pairs if present
+            major_pairs = [
+                "BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT",
+                "DOGE/USDT", "ADA/USDT", "TRX/USDT", "LTC/USDT", "MATIC/USDT"
+            ]
+            prioritized = [s for s in major_pairs if s in filtered]
+            others = [s for s in filtered if s not in prioritized]
+            return (prioritized + others)[:20]
         except Exception as e:
             logger.error(f"Error fetching trading pairs: {str(e)}")
             raise
@@ -100,4 +114,4 @@ class MarketDataService:
             }
         except Exception as e:
             logger.error(f"Error fetching market summary for {symbol}: {str(e)}")
-            raise 
+            raise

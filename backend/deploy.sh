@@ -10,7 +10,7 @@ pip install -r requirements.txt
 # Set up environment variables
 export MEXC_API_KEY="your_api_key"
 export MEXC_API_SECRET="your_api_secret"
-export SECRET_KEY="your_secret_key"
+export SECRET_KEY="your-very-secret-key"
 export DATABASE_URL="sqlite:///./scheduled_trader.db"
 
 # Start the FastAPI application with Gunicorn

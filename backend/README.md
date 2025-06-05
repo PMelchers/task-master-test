@@ -27,7 +27,7 @@ pip install -r requirements.txt
 4. Create a `.env` file in the root directory with the following variables:
 ```
 DATABASE_URL=sqlite:///./scheduled_trader.db
-JWT_SECRET_KEY=your-secret-key-here
+JWT_SECRET_KEY=your-very-secret-key
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
@@ -37,8 +37,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 uvicorn main:app --reload
 ```
 
-The API will be available at http://localhost:8080
-API documentation will be available at http://localhost:8080/docs
+The API will be available at http://localhost:8084
+API documentation will be available at http://localhost:8084/docs
 
 ## Project Structure
 

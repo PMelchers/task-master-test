@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Loading } from '@/components/ui/loading';
@@ -22,11 +23,14 @@ ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip,
 
 interface MarketData {
   symbol: string;
-  last: number;
-  high: number;
-  low: number;
-  volume: number;
-  change: number;
+  last_price: number;
+  '24h_high': number;
+  '24h_low': number;
+  '24h_volume': number;
+  '24h_change': number;
+  bid?: number | null;
+  ask?: number | null;
+  timestamp?: string;
 }
 
 interface WebSocketMessage {
@@ -53,7 +57,12 @@ export default function MarketPage() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('BTC/USDT');
   const [priceHistory, setPriceHistory] = useState<PriceHistory>({});
 
-  const { lastMessage, isConnected } = useWebSocket<WebSocketMessage>('ws://localhost:8080/ws/market-data');
+  const token = getCookie('token');
+  const wsUrl = token
+    ? `ws://localhost:8084/ws/market-data?token=${token}`
+    : 'ws://localhost:8084/ws/market-data';
+
+  const { lastMessage, isConnected } = useWebSocket<WebSocketMessage>(wsUrl);
 
   useEffect(() => {
     const token = getCookie('token');
@@ -64,30 +73,45 @@ export default function MarketPage() {
 
     const fetchInitialMarketData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/market-data/trading-pairs', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        const response = await fetch('http://localhost:8084/market-data/trading-pairs', {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) {
           throw new Error('Failed to fetch market data');
         }
 
-        const data = await response.json();
+        const symbols = await response.json();
         const initialData: Record<string, MarketData> = {};
-        data.forEach((symbol: string) => {
-          initialData[symbol] = {
-            symbol,
-            last: 0,
-            high: 0,
-            low: 0,
-            volume: 0,
-            change: 0
-          };
-        });
+
+        // Fetch summary for each symbol in parallel
+        await Promise.all(
+          symbols.map(async (symbol: string) => {
+            const summaryRes = await fetch(`http://localhost:8084/market-data/summary/${encodeURIComponent(symbol)}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (summaryRes.ok) {
+              const summary = await summaryRes.json();
+              initialData[symbol] = summary;
+            } else {
+              // fallback to zeros if error
+              initialData[symbol] = {
+                symbol,
+                last_price: 0,
+                '24h_high': 0,
+                '24h_low': 0,
+                '24h_volume': 0,
+                '24h_change': 0,
+                bid: null,
+                ask: null,
+                timestamp: ''
+              };
+            }
+          })
+        );
+
         setMarketData(initialData);
-        if (data.length > 0) setSelectedSymbol(data[0]);
+        if (symbols.length > 0) setSelectedSymbol(symbols[0]);
       } catch (error) {
         console.error('Error fetching market data:', error);
       } finally {
@@ -105,10 +129,10 @@ export default function MarketPage() {
         ...prev,
         [symbol]: {
           ...prev[symbol],
-          last: data.price,
-          high: data.high,
-          low: data.low,
-          volume: data.volume
+          last_price: data.price,
+          '24h_high': data.high,
+          '24h_low': data.low,
+          '24h_volume': data.volume
         }
       }));
       if (typeof data.timestamp === 'string') {
@@ -187,39 +211,35 @@ export default function MarketPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredData.map((data) => (
-            <Card key={data.symbol}>
-              <CardHeader>
-                <CardTitle>{data.symbol}</CardTitle>
-                <CardDescription>
-                  Last Price: ${data.last.toFixed(2)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">24h High</p>
-                    <p>${data.high.toFixed(2)}</p>
+            <Link key={data.symbol} href={`/dashboard/market/${encodeURIComponent(data.symbol)}`}>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle>{data.symbol}</CardTitle>
+                  <CardDescription>
+                    Last Price: ${data.last_price?.toFixed(2) ?? '0.00'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">24h High</p>
+                      <p>${data['24h_high']?.toFixed(2) ?? '0.00'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">24h Low</p>
+                      <p>${data['24h_low']?.toFixed(2) ?? '0.00'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">24h Volume</p>
+                      <p>{data['24h_volume']?.toFixed(2) ?? '0.00'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">24h Low</p>
-                    <p>${data.low.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">24h Volume</p>
-                    <p>{data.volume.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">24h Change</p>
-                    <p className={data.change >= 0 ? 'text-green-500' : 'text-red-500'}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
     </div>
   );
-} 
+}

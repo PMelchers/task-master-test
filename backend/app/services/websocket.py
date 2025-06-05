@@ -1,11 +1,13 @@
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect, APIRouter
 from typing import Dict, List, Set
 import json
 import logging
 from datetime import datetime
+from jose import jwt, JWTError
+from app.core.config import settings
 from app.core.exchange import MEXCExchange
-from app.db.database import get_db
-from app.db.models import Trade, TradeStatus
+from app.db.database import get_db, SessionLocal
+from app.db.models import Trade, TradeStatus, User
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,6 @@ class WebSocketManager:
         self.exchange = exchange
 
     async def connect(self, websocket: WebSocket, client_type: str):
-        await websocket.accept()
         self.active_connections[client_type].add(websocket)
         logger.info(f"New {client_type} WebSocket connection established")
 
@@ -97,4 +98,41 @@ class WebSocketManager:
             db.close()
 
 # Create global WebSocket manager instance
-websocket_manager = WebSocketManager() 
+websocket_manager = WebSocketManager()
+
+# Define the router at the top of the file if not already present
+websocket_router = APIRouter(tags=["websocket"])
+
+@websocket_router.websocket("/ws/trade-updates")
+async def trade_updates_websocket(websocket: WebSocket):
+    await websocket.accept()  # Accept here, only once!
+    # ... authentication logic ...
+    token = None  # Extract token from the request
+    if not token:
+        logger.warning("No token provided")
+        await websocket.close(code=1008)
+        return
+
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        logger.info(f"Decoded payload: {payload}")
+        username = payload.get("sub")
+        if username is None:
+            logger.warning("No username in token")
+            await websocket.close(code=1008)
+            return
+    except JWTError as e:
+        logger.error(f"JWT decode error: {e}")
+        await websocket.close(code=1008)
+        return
+
+    db = SessionLocal()
+    user = db.query(User).filter(User.username == username).first()
+    db.close()
+    if user is None:
+        logger.warning(f"User not found: {username}")
+        await websocket.close(code=1008)
+        return
+
+    await websocket_manager.connect(websocket, 'trade_updates')
+    # ... rest of your logic ...
