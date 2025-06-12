@@ -81,7 +81,9 @@ export default function MarketPage() {
           throw new Error('Failed to fetch market data');
         }
 
-        const symbols = await response.json();
+        let symbols = await response.json();
+        symbols = symbols.slice(0, 6); // Limit to 5 coins
+
         const initialData: Record<string, MarketData> = {};
 
         // Fetch summary for each symbol in parallel
@@ -216,22 +218,22 @@ export default function MarketPage() {
                 <CardHeader>
                   <CardTitle>{data.symbol}</CardTitle>
                   <CardDescription>
-                    Last Price: ${data.last_price?.toFixed(2) ?? '0.00'}
+                    Last Price: ${data.last_price !== undefined && data.last_price !== null ? data.last_price.toString() : '0'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500">24h High</p>
-                      <p>${data['24h_high']?.toFixed(2) ?? '0.00'}</p>
+                      <p>${data['24h_high'] !== undefined && data['24h_high'] !== null ? data['24h_high'].toString() : '0'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">24h Low</p>
-                      <p>${data['24h_low']?.toFixed(2) ?? '0.00'}</p>
+                      <p>${data['24h_low'] !== undefined && data['24h_low'] !== null ? data['24h_low'].toString() : '0'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">24h Volume</p>
-                      <p>{data['24h_volume']?.toFixed(2) ?? '0.00'}</p>
+                      <p>{data['24h_volume'] !== undefined && data['24h_volume'] !== null ? data['24h_volume'].toString() : '0'}</p>
                     </div>
                   </div>
                 </CardContent>
