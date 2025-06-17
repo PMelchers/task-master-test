@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 import enum
@@ -12,6 +12,14 @@ class TradeStatus(str, enum.Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
 
+# Association table for many-to-many User <-> Strategy
+user_strategies = Table(
+    'user_strategies',
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
+    Column('strategy_id', Integer, ForeignKey('strategies.id'), primary_key=True)
+)
+
 class User(Base):
     __tablename__ = "users"
 
@@ -23,6 +31,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     scheduled_trades = relationship("ScheduledTrade", back_populates="user")
+    strategies = relationship("Strategy", secondary=user_strategies, back_populates="users")
 
 class ScheduledTrade(Base):
     __tablename__ = "scheduled_trades"
@@ -61,4 +70,12 @@ class MarketData(Base):
     price = Column(Float)
     volume = Column(Float)
     timestamp = Column(DateTime, default=datetime.utcnow)
-    technical_indicators = Column(String)  # JSON string of technical indicators 
+    technical_indicators = Column(String)  # JSON string of technical indicators
+
+class Strategy(Base):
+    __tablename__ = "strategies"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String)
+
+    users = relationship("User", secondary=user_strategies, back_populates="strategies")

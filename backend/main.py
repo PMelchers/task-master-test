@@ -42,7 +42,7 @@ async def initialize_components():
     try:
         from app.db.database import engine
         from app.db.models import Base
-        from app.api import auth, trades, portfolio, websocket, market_data
+        from app.api import auth, trades, portfolio, websocket, market_data, strategy  # Import strategy
 
         # Create all tables
         Base.metadata.create_all(bind=engine)
@@ -54,6 +54,7 @@ async def initialize_components():
         app.include_router(portfolio.router)
         app.include_router(websocket.websocket_router)
         app.include_router(market_data.router)
+        app.include_router(strategy.router)  # Include strategy router
         logger.info("Routers included successfully")
 
         # The following is commented out for now:
